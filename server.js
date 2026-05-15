@@ -1,64 +1,43 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { films, newestFilms, popularFilms, projects, tvShows } from "./data.js";
-import getData from "./getData.js";
-import getDataById from "./getDataById.js";
+
+import filmsRouter from "./routes/filmsRouter.js";
+import projectsRouter from "./routes/projectsRouter.js";
+import tvShowsRouter from "./routes/tvShowsRouter.js";
+import errorHandler from "./middleware/errorHandler.js";
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-getData(app, "/projects", projects);
-
-getDataById(app, "/projects/:id", projects);
-
-getData(app, "/popular-films", popularFilms);
-
-getData(app, "/films", films);
-
-getData(app, "/tv-shows", tvShows);
-
-getData(app, "/newest-films", newestFilms);
+app.use(filmsRouter);
+app.use(projectsRouter);
+app.use(tvShowsRouter);
 
 app.get("/", (req, res) => {
   res.send(`
-    <div>
+    <div style="font-family: sans-serif; padding: 20px;">
       <h1>Welcome to Custom API</h1>
-      <p style="font-size: 25px">Available Categories:</p>
-      <ul style="font-size: 20px">
-        <li>
-          <a href="/projects">projects</a>
-        </li>
-        <li>
-          <a href="/projects/:id">projects:id</a>
-        </li>
-        <li>
-          <a href="/popular-films">popular-films</a>
-        </li>
-        <li>
-          <a href="/films">films</a>
-        </li>
-        <li>
-          <a href="/tv-shows">tv-shows</a>
-        </li>
-        <li>
-          <a href="/newest-films">newest-films</a>
-        </li>
-        </ul>
+      <p style="font-size: 20px;">Available endpoints:</p>
+      <ul style="font-size: 18px; line-height: 2;">
+        <li><a href="/projects">GET /projects</a></li>
+        <li><a href="/projects/1">GET /projects/:id</a></li>
+        <li><a href="/films">GET /films</a></li>
+        <li><a href="/popular-films">GET /popular-films</a></li>
+        <li><a href="/newest-films">GET /newest-films</a></li>
+        <li><a href="/tv-shows">GET /tv-shows</a></li>
+      </ul>
     </div>
   `);
 });
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something broke!");
-});
+app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log(`API is running`);
+app.listen(PORT, () => {
+  console.log(`API is running on port ${PORT}`);
 });
